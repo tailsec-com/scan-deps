@@ -1,0 +1,21 @@
+{
+  "name": "@tailsec/scan-deps",
+  "version": "0.1.0",
+  "description": "Dependency vulnerability and license compliance scanner",
+  "type": "module",
+  "exports": {
+    ".": "./src/detectors/deps.ts",
+    "./cli": "./src/cli-deps.ts"
+  },
+  "bin": {
+    "tailsec-scan-deps": "./src/cli-deps.ts"
+  },
+  "scripts": {
+    "scan": "bun run src/cli-deps.ts"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": ["security", "dependencies", "vulnerabilities", "license", "npm", "saas"],
+  "license": "MIT"
+}
