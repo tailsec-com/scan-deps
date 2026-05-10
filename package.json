@@ -1,21 +1,31 @@
 {
   "name": "@tailsec/scan-deps",
   "version": "0.1.0",
-  "description": "Dependency vulnerability and license compliance scanner",
+  "description": "Security scanner for dependencies",
   "type": "module",
   "exports": {
-    ".": "./src/detectors/deps.ts",
-    "./cli": "./src/cli-deps.ts"
+    ".": "./src/index.ts"
   },
   "bin": {
-    "tailsec-scan-deps": "./src/cli-deps.ts"
+    "tailsec-scan-deps": "./src/cli.ts"
   },
   "scripts": {
-    "scan": "bun run src/cli-deps.ts"
+    "test": "node --experimental-vm-modules /Users/mark/Projects/Tailsec/node_modules/jest/bin/jest.js",
+    "typecheck": "tsc --noEmit"
   },
   "engines": {
     "node": ">=18"
   },
-  "keywords": ["security", "dependencies", "vulnerabilities", "license", "npm", "saas"],
-  "license": "MIT"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tailsec-com/scan-deps"
+  },
+  "keywords": ["security", "dependencies", "npm", "scanner"],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.4.9",
+    "typescript": "^5.0.0"
+  }
 }

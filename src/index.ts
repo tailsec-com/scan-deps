@@ -1,0 +1,1 @@
+export { scanDeps, formatDepsOutput, type DepFinding } from './deps.js';

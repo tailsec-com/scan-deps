@@ -1,5 +1,4 @@
-import { readFileSync, readdirSync } from 'fs';
-import { join, extname } from 'path';
+import { readFileSync } from 'fs';
 
 export interface DepFinding {
   ruleId: string;
