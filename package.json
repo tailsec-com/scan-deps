@@ -10,7 +10,7 @@
     "tailsec-scan-deps": "./src/cli.ts"
   },
   "scripts": {
-    "test": "node --experimental-vm-modules /Users/mark/Projects/Tailsec/node_modules/jest/bin/jest.js",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest",
     "typecheck": "tsc --noEmit"
   },
   "engines": {
