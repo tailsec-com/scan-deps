@@ -17,7 +17,7 @@ describe('scanDeps', () => {
     mkdirSync(tempDir, { recursive: true });
     writeFileSync(join(tempDir, 'package.json'), JSON.stringify({
       name: 'test-pkg',
-      dependencies: { 'express': '^4.18.0' }
+      dependencies: { 'axios': '^1.6.0' }
     }, null, 2));
 
     const findings = scanDeps(join(tempDir, 'package.json'));
@@ -72,6 +72,123 @@ describe('scanDeps', () => {
 
     const findings = scanDeps(join(tempDir, 'package.json'));
     expect(findings.some(f => f.ruleId === 'known-vuln-glob')).toBe(true);
+    expect(findings[0].severity).toBe('high');
+  });
+
+  test('Scan package.json with tar <6.2 (critical dep) → finds critical-dep-tar', () => {
+    tempDir = join(os.tmpdir(), `tailsec-test-${Date.now()}`);
+    mkdirSync(tempDir, { recursive: true });
+    writeFileSync(join(tempDir, 'package.json'), JSON.stringify({
+      name: 'test-pkg',
+      dependencies: { 'tar': '6.1.1' }
+    }, null, 2));
+
+    const findings = scanDeps(join(tempDir, 'package.json'));
+    expect(findings.some(f => f.ruleId === 'critical-dep-tar')).toBe(true);
+    expect(findings[0].severity).toBe('critical');
+  });
+
+  test('Scan package.json with ws <8.17.1 (critical dep) → finds critical-dep-ws', () => {
+    tempDir = join(os.tmpdir(), `tailsec-test-${Date.now()}`);
+    mkdirSync(tempDir, { recursive: true });
+    writeFileSync(join(tempDir, 'package.json'), JSON.stringify({
+      name: 'test-pkg',
+      dependencies: { 'ws': '8.16.0' }
+    }, null, 2));
+
+    const findings = scanDeps(join(tempDir, 'package.json'));
+    expect(findings.some(f => f.ruleId === 'critical-dep-ws')).toBe(true);
+    expect(findings[0].severity).toBe('critical');
+  });
+
+  test('Scan package.json with express <4.19.2 (critical dep) → finds critical-dep-express', () => {
+    tempDir = join(os.tmpdir(), `tailsec-test-${Date.now()}`);
+    mkdirSync(tempDir, { recursive: true });
+    writeFileSync(join(tempDir, 'package.json'), JSON.stringify({
+      name: 'test-pkg',
+      dependencies: { 'express': '4.19.1' }
+    }, null, 2));
+
+    const findings = scanDeps(join(tempDir, 'package.json'));
+    expect(findings.some(f => f.ruleId === 'critical-dep-express')).toBe(true);
+    expect(findings[0].severity).toBe('critical');
+  });
+
+  test('Scan package.json with request (deprecated) → finds critical-dep-request', () => {
+    tempDir = join(os.tmpdir(), `tailsec-test-${Date.now()}`);
+    mkdirSync(tempDir, { recursive: true });
+    writeFileSync(join(tempDir, 'package.json'), JSON.stringify({
+      name: 'test-pkg',
+      dependencies: { 'request': '2.88.0' }
+    }, null, 2));
+
+    const findings = scanDeps(join(tempDir, 'package.json'));
+    expect(findings.some(f => f.ruleId === 'critical-dep-request')).toBe(true);
+    expect(findings[0].severity).toBe('critical');
+  });
+
+  test('Scan package.json with moment (deprecated) → finds critical-dep-moment', () => {
+    tempDir = join(os.tmpdir(), `tailsec-test-${Date.now()}`);
+    mkdirSync(tempDir, { recursive: true });
+    writeFileSync(join(tempDir, 'package.json'), JSON.stringify({
+      name: 'test-pkg',
+      dependencies: { 'moment': '2.29.4' }
+    }, null, 2));
+
+    const findings = scanDeps(join(tempDir, 'package.json'));
+    expect(findings.some(f => f.ruleId === 'critical-dep-moment')).toBe(true);
+    expect(findings[0].severity).toBe('critical');
+  });
+
+  test('Scan package.json with eslint-scope <3.7.2 → finds critical-dep-eslint-scope (any version)', () => {
+    tempDir = join(os.tmpdir(), `tailsec-test-${Date.now()}`);
+    mkdirSync(tempDir, { recursive: true });
+    writeFileSync(join(tempDir, 'package.json'), JSON.stringify({
+      name: 'test-pkg',
+      dependencies: { 'eslint-scope': '3.7.1' }
+    }, null, 2));
+
+    const findings = scanDeps(join(tempDir, 'package.json'));
+    expect(findings.some(f => f.ruleId === 'critical-dep-eslint-scope')).toBe(true);
+    expect(findings[0].severity).toBe('critical');
+  });
+
+  test('Scan package.json with tar <6.1.13 → finds critical-dep-tar (higher severity takes precedence)', () => {
+    tempDir = join(os.tmpdir(), `tailsec-test-${Date.now()}`);
+    mkdirSync(tempDir, { recursive: true });
+    writeFileSync(join(tempDir, 'package.json'), JSON.stringify({
+      name: 'test-pkg',
+      dependencies: { 'tar': '6.1.10' }
+    }, null, 2));
+
+    const findings = scanDeps(join(tempDir, 'package.json'));
+    expect(findings.some(f => f.ruleId === 'critical-dep-tar')).toBe(true);
+    expect(findings[0].severity).toBe('critical');
+  });
+
+  test('Scan package.json with postcss <8.4.31 → finds known-vuln-postcss', () => {
+    tempDir = join(os.tmpdir(), `tailsec-test-${Date.now()}`);
+    mkdirSync(tempDir, { recursive: true });
+    writeFileSync(join(tempDir, 'package.json'), JSON.stringify({
+      name: 'test-pkg',
+      dependencies: { 'postcss': '8.4.30' }
+    }, null, 2));
+
+    const findings = scanDeps(join(tempDir, 'package.json'));
+    expect(findings.some(f => f.ruleId === 'known-vuln-postcss')).toBe(true);
+    expect(findings[0].severity).toBe('high');
+  });
+
+  test('Scan package.json with json5 <1.0.2 → finds known-vuln-json5', () => {
+    tempDir = join(os.tmpdir(), `tailsec-test-${Date.now()}`);
+    mkdirSync(tempDir, { recursive: true });
+    writeFileSync(join(tempDir, 'package.json'), JSON.stringify({
+      name: 'test-pkg',
+      dependencies: { 'json5': '1.0.1' }
+    }, null, 2));
+
+    const findings = scanDeps(join(tempDir, 'package.json'));
+    expect(findings.some(f => f.ruleId === 'known-vuln-json5')).toBe(true);
     expect(findings[0].severity).toBe('high');
   });
 });
