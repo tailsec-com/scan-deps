@@ -12,22 +12,31 @@ export interface DepFinding {
   advice: string[];
 }
 
-const CRITICAL_DEPS = [
-  { pkg: 'event-stream', ver: '<3.3.6', reason: 'Malicious code injected via event-stream flatmap-stream dependency' },
-  { pkg: 'left-pad', ver: '<1.3.0', reason: 'Package removed from npm — potential supply chain risk' },
-  { pkg: 'node-uuid', ver: 'any', reason: 'Deprecated — use uuid package instead' },
-  { pkg: 'request', ver: 'any', reason: 'Deprecated — no security patches since 2020' },
-  { pkg: 'moment', ver: 'any', reason: 'Deprecated — use date-fns or luxon as successor has no security patches' },
-  { pkg: 'lodash', ver: '<4.17.21', reason: 'Prototype pollution vulnerabilities (CVE-2021-23337, CVE-2020-8203)' },
-  { pkg: 'underscore', ver: '<1.13.0', reason: 'Prototype pollution and XSS vulnerabilities' },
-  { pkg: 'minimist', ver: '<1.2.6', reason: 'Prototype pollution (CVE-2021-44906)' },
-  { pkg: 'handlebars', ver: '<4.7.7', reason: 'RCE via prototype pollution (CVE-2021-23369)' },
-  { pkg: 'blamer', ver: 'any', reason: 'Malicious package — steals git credentials' },
-  { pkg: 'ppth拔', ver: 'any', reason: 'Malicious package — typosquatting of pptx-genjs' },
-  { pkg: 'eslint-scope', ver: '<3.7.2', reason: 'Brute-force git tokens from .npmrc (CVE-2018-16469)' },
-];
+const PKG_CACHE = new Map<string, Array<{ name: string; version: string }>>();
+const CRITICAL_DEPS = new Map([
+  ['event-stream', { ver: '<3.3.6', reason: 'Malicious code injected via event-stream flatmap-stream dependency' }],
+  ['left-pad', { ver: '<1.3.0', reason: 'Package removed from npm — potential supply chain risk' }],
+  ['node-uuid', { ver: 'any', reason: 'Deprecated — use uuid package instead' }],
+  ['request', { ver: 'any', reason: 'Deprecated — no security patches since 2020' }],
+  ['moment', { ver: 'any', reason: 'Deprecated — use date-fns or luxon as successor has no security patches' }],
+  ['lodash', { ver: '<4.17.21', reason: 'Prototype pollution vulnerabilities (CVE-2021-23337, CVE-2020-8203)' }],
+  ['underscore', { ver: '<1.13.0', reason: 'Prototype pollution and XSS vulnerabilities' }],
+  ['minimist', { ver: '<1.2.6', reason: 'Prototype pollution (CVE-2021-44906)' }],
+  ['handlebars', { ver: '<4.7.7', reason: 'RCE via prototype pollution (CVE-2021-23369)' }],
+  ['blamer', { ver: 'any', reason: 'Malicious package — steals git credentials' }],
+  ['ppth拔', { ver: 'any', reason: 'Malicious package — typosquatting of pptx-genjs' }],
+  ['eslint-scope', { ver: '<3.7.2', reason: 'Brute-force git tokens from .npmrc (CVE-2018-16469)' }],
+  ['tar', { ver: '<6.2', reason: 'CVE-2023-46850: Arbitrary file creation/overwrite via insufficient symlink protection' }],
+  ['xml2js', { ver: '<0.5.0.2', reason: 'CVE-2021-44912: Prototype pollution via x2js xml2js serverless' }],
+  ['semver', { ver: '<7.5.4', reason: 'CVE-2022-25883: Regular expression denial of service (ReDoS)' }],
+  ['express', { ver: '<4.19.2', reason: 'Path traversal vulnerability in express.static' }],
+  ['fast-xml-parser', { ver: '<4.2.5', reason: 'ReDoS vulnerability in fast-xml-parser' }],
+  ['ws', { ver: '<8.17.1', reason: 'CVE-2024-37890: Prototype pollution in ws WebSocket library' }],
+  ['cookie', { ver: '<0.7.1', reason: 'CVE-2024-47764: Cookie jar overflow in cookie parser' }],
+  ['body-parser', { ver: '<1.20.3', reason: 'CVE-2023-34104: Open redirect vulnerability in body-parser' }],
+]);
 
-const KNOWN_VULNERABLE = new Map([
+const KNOWN_VULNERABLE = new Map<string, string>([
   ['glob', '<8.1.0'],
   ['tar', '<6.1.13'],
   ['postcss', '<8.4.31'],
@@ -57,7 +66,7 @@ const LICENSE_WARN = new Set([
   'LGPL-2.1', 'LGPL-3.0',
   'MPL-2.0', 'MPL-1.1',
   'CDDL-1.0', 'EPL-1.0', 'EPL-2.0',
-  'OSL-3.0', 'EUPL-1.2',
+  'OSL-3.0', 'EUPL-1.2', 'EUPL-1.1', 'EUPL-1.0',
 ]);
 
 function findDeps(packageJsonPath: string): Array<{ name: string; version: string }> {
@@ -85,18 +94,17 @@ function findDeps(packageJsonPath: string): Array<{ name: string; version: strin
 function checkCriticalDeps(deps: Array<{ name: string; version: string }>): DepFinding[] {
   const findings: DepFinding[] = [];
   for (const dep of deps) {
-    for (const crit of CRITICAL_DEPS) {
-      if (crit.pkg === dep.name) {
-        findings.push({
-          ruleId: `critical-dep-${dep.name.replace('/', '-')}`,
-          type: 'dependency',
-          severity: 'critical',
-          title: `Critical/trivial dependency: ${dep.name}`,
-          package: dep.name,
-          currentVersion: dep.version,
-          advice: [crit.reason, 'Remove or replace this package immediately'],
-        });
-      }
+    const crit = CRITICAL_DEPS.get(dep.name);
+    if (crit) {
+      findings.push({
+        ruleId: `critical-dep-${dep.name.replace('/', '-')}`,
+        type: 'dependency',
+        severity: 'critical',
+        title: `Critical/trivial dependency: ${dep.name}`,
+        package: dep.name,
+        currentVersion: dep.version,
+        advice: [crit.reason, 'Remove or replace this package immediately'],
+      });
     }
   }
   return findings;
