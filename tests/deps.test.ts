@@ -191,6 +191,45 @@ describe('scanDeps', () => {
     expect(findings.some(f => f.ruleId === 'known-vuln-json5')).toBe(true);
     expect(findings[0].severity).toBe('high');
   });
+
+  test('Scan package.json with follow-redirects <1.15.4 → finds critical-dep-follow-redirects', () => {
+    tempDir = join(os.tmpdir(), `tailsec-test-${Date.now()}`);
+    mkdirSync(tempDir, { recursive: true });
+    writeFileSync(join(tempDir, 'package.json'), JSON.stringify({
+      name: 'test-pkg',
+      dependencies: { 'follow-redirects': '1.15.3' }
+    }, null, 2));
+
+    const findings = scanDeps(join(tempDir, 'package.json'));
+    expect(findings.some(f => f.ruleId === 'critical-dep-follow-redirects')).toBe(true);
+    expect(findings[0].severity).toBe('critical');
+  });
+
+  test('Scan package.json with webpack-dev-middleware <7.2.0 → finds critical-dep-webpack-dev-middleware', () => {
+    tempDir = join(os.tmpdir(), `tailsec-test-${Date.now()}`);
+    mkdirSync(tempDir, { recursive: true });
+    writeFileSync(join(tempDir, 'package.json'), JSON.stringify({
+      name: 'test-pkg',
+      dependencies: { 'webpack-dev-middleware': '7.1.0' }
+    }, null, 2));
+
+    const findings = scanDeps(join(tempDir, 'package.json'));
+    expect(findings.some(f => f.ruleId === 'critical-dep-webpack-dev-middleware')).toBe(true);
+    expect(findings[0].severity).toBe('critical');
+  });
+
+  test('Scan package.json with http2 <9.4.44 → finds critical-dep-http2', () => {
+    tempDir = join(os.tmpdir(), `tailsec-test-${Date.now()}`);
+    mkdirSync(tempDir, { recursive: true });
+    writeFileSync(join(tempDir, 'package.json'), JSON.stringify({
+      name: 'test-pkg',
+      dependencies: { 'http2': '9.4.43' }
+    }, null, 2));
+
+    const findings = scanDeps(join(tempDir, 'package.json'));
+    expect(findings.some(f => f.ruleId === 'critical-dep-http2')).toBe(true);
+    expect(findings[0].severity).toBe('critical');
+  });
 });
 
 describe('formatDepsOutput', () => {

@@ -34,6 +34,9 @@ const CRITICAL_DEPS = new Map([
   ['ws', { ver: '<8.17.1', reason: 'CVE-2024-37890: Prototype pollution in ws WebSocket library' }],
   ['cookie', { ver: '<0.7.1', reason: 'CVE-2024-47764: Cookie jar overflow in cookie parser' }],
   ['body-parser', { ver: '<1.20.3', reason: 'CVE-2023-34104: Open redirect vulnerability in body-parser' }],
+  ['follow-redirects', { ver: '<1.15.4', reason: 'CVE-2024-39338: Exposure of sensitive information via absolute URL' }],
+  ['webpack-dev-middleware', { ver: '<7.2.0', reason: 'CVE-2024-29180: Path traversal in webpack dev middleware' }],
+  ['http2', { ver: '<9.4.44', reason: 'CVE-2023-44487: HTTP/2 Rapid Reset Attack DoS' }],
 ]);
 
 const KNOWN_VULNERABLE = new Map<string, string>([
